@@ -1,5 +1,6 @@
 let currentSettings = null;
 let currentStats = null;
+let selectedSite = 'google.com';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadData() {
   chrome.runtime.sendMessage({ action: 'getSettings' }, (settings) => {
     currentSettings = settings;
+    populateSiteSelector();
     applyTheme(settings.ui.theme);
     updateSettingsUI();
     updateJsonPreview();
@@ -18,12 +20,29 @@ function loadData() {
   
   chrome.runtime.sendMessage({ action: 'getStats' }, (stats) => {
     currentStats = stats;
-    updateStatsDisplay(stats);
+    updateStatsDisplay();
   });
+}
+
+function populateSiteSelector() {
+    const selector = document.getElementById('siteSelector');
+    selector.innerHTML = '';
+    for (const siteKey in currentSettings.sites) {
+        const option = document.createElement('option');
+        option.value = siteKey;
+        option.textContent = siteKey;
+        selector.appendChild(option);
+    }
+    selector.value = selectedSite;
 }
 
 // Setup event listeners
 function setupEventListeners() {
+    document.getElementById('siteSelector').addEventListener('change', (e) => {
+        selectedSite = e.target.value;
+        updateSettingsUI();
+        updateStatsDisplay();
+    });
   // Tab switching
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -50,8 +69,16 @@ function setupEventListeners() {
   // Tracking toggle
   document.getElementById('trackingToggle').addEventListener('click', function() {
     this.classList.toggle('active');
-    currentSettings.tracking.enabled = this.classList.contains('active');
+    currentSettings.trackingEnabled = this.classList.contains('active');
     updateStatusDisplay();
+  });
+
+  document.getElementById('siteTrackingToggle').addEventListener('click', function() {
+      this.classList.toggle('active');
+      if (currentSettings.sites[selectedSite]) {
+          currentSettings.sites[selectedSite].enabled = this.classList.contains('active');
+      }
+      updateStatusDisplay();
   });
   
   // Add keep parameter
@@ -78,10 +105,10 @@ function setupEventListeners() {
   
   // Reset stats
   document.getElementById('resetStatsBtn').addEventListener('click', () => {
-    if (confirm('Reset all statistics?')) {
-      chrome.runtime.sendMessage({ action: 'resetStats' }, (stats) => {
+    if (confirm(`Reset statistics for ${selectedSite}?`)) {
+      chrome.runtime.sendMessage({ action: 'resetStats', site: selectedSite }, (stats) => {
         currentStats = stats;
-        updateStatsDisplay(stats);
+        updateStatsDisplay();
       });
     }
   });
@@ -114,13 +141,14 @@ function applyTheme(theme) {
 }
 
 // Update stats display
-function updateStatsDisplay(stats) {
-  document.getElementById('totalCleaned').textContent = stats.totalCleaned;
-  document.getElementById('paramsRemoved').textContent = stats.paramsRemoved;
-  
-  const lastCleanedEl = document.getElementById('lastCleaned');
-  if (stats.lastCleaned) {
-    const date = new Date(stats.lastCleaned);
+function updateStatsDisplay() {
+    const siteStats = currentStats[selectedSite] || { totalCleaned: 0, paramsRemoved: 0, lastCleaned: null };
+    document.getElementById('totalCleaned').textContent = siteStats.totalCleaned;
+    document.getElementById('paramsRemoved').textContent = siteStats.paramsRemoved;
+
+    const lastCleanedEl = document.getElementById('lastCleaned');
+    if (siteStats.lastCleaned) {
+    const date = new Date(siteStats.lastCleaned);
     const now = new Date();
     const diffMs = now - date;
     const diffMins = Math.floor(diffMs / 60000);
@@ -146,26 +174,44 @@ function updateStatsDisplay(stats) {
 
 // Update status display
 function updateStatusDisplay() {
-  const statusDot = document.getElementById('statusDot');
-  const statusText = document.getElementById('statusText');
-  
-  if (currentSettings.tracking.enabled) {
-    statusDot.classList.remove('inactive');
-    statusText.textContent = 'Active';
-  } else {
-    statusDot.classList.add('inactive');
-    statusText.textContent = 'Inactive';
-  }
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+
+    const siteSettings = currentSettings.sites[selectedSite];
+    const isSiteEnabled = siteSettings ? siteSettings.enabled : false;
+
+    if (currentSettings.trackingEnabled && isSiteEnabled) {
+        statusDot.classList.remove('inactive');
+        statusText.textContent = 'Active';
+    } else {
+        statusDot.classList.add('inactive');
+        statusText.textContent = 'Inactive';
+    }
 }
+
 
 // Update settings UI
 function updateSettingsUI() {
+    if (!currentSettings) return;
+
+    // Update selected site name
+    document.querySelectorAll('.selected-site-name').forEach(el => el.textContent = selectedSite);
+
   // Update tracking toggle
   const trackingToggle = document.getElementById('trackingToggle');
-  if (currentSettings.tracking.enabled) {
+  if (currentSettings.trackingEnabled) {
     trackingToggle.classList.add('active');
   } else {
     trackingToggle.classList.remove('active');
+  }
+
+  // Update site-specific tracking toggle
+  const siteTrackingToggle = document.getElementById('siteTrackingToggle');
+  const siteSettings = currentSettings.sites[selectedSite];
+  if (siteSettings && siteSettings.enabled) {
+      siteTrackingToggle.classList.add('active');
+  } else {
+      siteTrackingToggle.classList.remove('active');
   }
   
   // Update theme selection
@@ -187,7 +233,10 @@ function updateKeepParamsChips() {
   const container = document.getElementById('keepParamsChips');
   container.innerHTML = '';
   
-  currentSettings.tracking.keepParams.forEach(param => {
+  const siteSettings = currentSettings.sites[selectedSite];
+  if (!siteSettings) return;
+
+  siteSettings.keepParams.forEach(param => {
     const chip = document.createElement('div');
     chip.className = 'chip';
     chip.innerHTML = `
@@ -201,7 +250,7 @@ function updateKeepParamsChips() {
   container.querySelectorAll('.chip-remove').forEach(btn => {
     btn.addEventListener('click', () => {
       const param = btn.dataset.param;
-      currentSettings.tracking.keepParams = currentSettings.tracking.keepParams.filter(p => p !== param);
+      siteSettings.keepParams = siteSettings.keepParams.filter(p => p !== param);
       updateKeepParamsChips();
     });
   });
@@ -211,9 +260,10 @@ function updateKeepParamsChips() {
 function addKeepParam() {
   const input = document.getElementById('addKeepParam');
   const param = input.value.trim();
+  const siteSettings = currentSettings.sites[selectedSite];
   
-  if (param && !currentSettings.tracking.keepParams.includes(param)) {
-    currentSettings.tracking.keepParams.push(param);
+  if (param && siteSettings && !siteSettings.keepParams.includes(param)) {
+    siteSettings.keepParams.push(param);
     updateKeepParamsChips();
     input.value = '';
   }
@@ -272,8 +322,9 @@ function importData(e) {
         if (response.success) {
           currentSettings = response.settings;
           currentStats = response.stats;
+          populateSiteSelector();
           updateSettingsUI();
-          updateStatsDisplay(currentStats);
+          updateStatsDisplay();
           applyTheme(currentSettings.ui.theme);
           updateJsonPreview();
           alert('Data imported successfully!');
@@ -291,6 +342,6 @@ function importData(e) {
 setInterval(() => {
   chrome.runtime.sendMessage({ action: 'getStats' }, (stats) => {
     currentStats = stats;
-    updateStatsDisplay(stats);
+    updateStatsDisplay();
   });
 }, 1000);

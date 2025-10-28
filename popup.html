@@ -55,7 +55,27 @@
       font-size: 13px;
       opacity: 0.9;
     }
+
+    .site-selector-container {
+      margin-bottom: 20px;
+    }
+
+    #siteSelector {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+    }
     
+    #siteSelector option {
+      background: #333;
+      color: white;
+    }
+
     .tabs {
       display: flex;
       gap: 8px;
@@ -354,9 +374,13 @@
       <div class="title">
         🛡️ Tracker Remover
       </div>
-      <div class="subtitle">Google Search Protection</div>
+      <div class="subtitle">Privacy Protection</div>
     </div>
     
+    <div class="site-selector-container">
+      <label for="siteSelector" class="setting-label">Selected Site</label>
+      <select id="siteSelector"></select>
+    </div>
     <div class="tabs">
       <button class="tab active" data-tab="stats">Stats</button>
       <button class="tab" data-tab="settings">Settings</button>
@@ -394,12 +418,21 @@
         <div class="setting-item">
           <div class="flex-row">
             <div>
-              <div class="setting-label">Tracking Protection</div>
-              <div class="setting-description">Remove tracking parameters from URLs</div>
+              <div class="setting-label">Global Tracking Protection</div>
+              <div class="setting-description">Enable or disable tracker removal for all sites.</div>
             </div>
             <div class="toggle-switch active" id="trackingToggle"></div>
           </div>
         </div>
+        <div class="setting-item">
+            <div class="flex-row">
+              <div>
+                <div class="setting-label">Enable for <span class="selected-site-name"></span></div>
+                <div class="setting-description">Enable or disable tracker removal for this site.</div>
+              </div>
+              <div class="toggle-switch active" id="siteTrackingToggle"></div>
+            </div>
+          </div>
       </div>
       
       <div class="card">
