@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 400px;
+      min-height: 500px;
+      padding: 0;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+    
+    .theme-gradient-purple {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .theme-gradient-blue {
+      background: linear-gradient(135deg, #0093E9 0%, #80D0C7 100%);
+    }
+    
+    .theme-gradient-sunset {
+      background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 50%, #2BFF88 100%);
+    }
+    
+    .theme-dark {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+    
+    .container {
+      padding: 24px;
+      color: white;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .title {
+      font-size: 22px;
+      margin: 0 0 8px 0;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .subtitle {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px;
+      border-radius: 10px;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0.7;
+    }
+    
+    .tab:hover {
+      opacity: 0.9;
+    }
+    
+    .tab.active {
+      background: rgba(255, 255, 255, 0.25);
+      opacity: 1;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+    
+    .stat-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .last-cleaned {
+      font-size: 11px;
+      text-align: center;
+      opacity: 0.8;
+      margin-top: 12px;
+    }
+    
+    .setting-item {
+      margin-bottom: 16px;
+    }
+    
+    .setting-label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .setting-description {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+    
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      color: white;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .theme-selector {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    
+    .theme-option {
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      font-size: 12px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .theme-option:hover {
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .theme-option.active {
+      border-color: white;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .button {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+    
+    .button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .button:active {
+      transform: translateY(0);
+    }
+    
+    .button.primary {
+      background: rgba(255, 255, 255, 0.95);
+      color: #667eea;
+    }
+    
+    .button.danger {
+      background: rgba(239, 68, 68, 0.8);
+      border-color: rgba(239, 68, 68, 0.9);
+    }
+    
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    .status-dot.inactive {
+      background: #ef4444;
+      animation: none;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .toggle-switch.active {
+      background: rgba(74, 222, 128, 0.8);
+    }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+    
+    .toggle-switch.active::after {
+      left: 26px;
+    }
+    
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+    
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    
+    .chip {
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .chip-remove {
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.7;
+    }
+    
+    .chip-remove:hover {
+      opacity: 1;
+    }
+    
+    .add-param-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .add-param-form input {
+      flex: 1;
+    }
+    
+    .add-param-form button {
+      padding: 10px 16px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="theme-gradient-purple">
+  <div class="container">
+    <div class="header">
+      <div class="title">
+        🛡️ Tracker Remover
+      </div>
+      <div class="subtitle">Google Search Protection</div>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" data-tab="stats">Stats</button>
+      <button class="tab" data-tab="settings">Settings</button>
+      <button class="tab" data-tab="data">Data</button>
+    </div>
+    
+    <!-- Stats Tab -->
+    <div class="tab-content active" id="stats-tab">
+      <div class="card">
+        <div class="flex-row" style="margin-bottom: 16px;">
+          <span class="setting-label">Status</span>
+          <div class="status-badge">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Active</span>
+          </div>
+        </div>
+        
+        <div class="stat-item">
+          <span class="stat-label">URLs Cleaned</span>
+          <span class="stat-value" id="totalCleaned">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Parameters Removed</span>
+          <span class="stat-value" id="paramsRemoved">0</span>
+        </div>
+        <div class="last-cleaned" id="lastCleaned">No tracking removed yet</div>
+      </div>
+      
+      <button class="button danger" id="resetStatsBtn">Reset Statistics</button>
+    </div>
+    
+    <!-- Settings Tab -->
+    <div class="tab-content" id="settings-tab">
+      <div class="card">
+        <div class="setting-item">
+          <div class="flex-row">
+            <div>
+              <div class="setting-label">Tracking Protection</div>
+              <div class="setting-description">Remove tracking parameters from URLs</div>
+            </div>
+            <div class="toggle-switch active" id="trackingToggle"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="setting-item">
+          <div class="setting-label">Theme</div>
+          <div class="theme-selector">
+            <div class="theme-option active" data-theme="gradient-purple">
+              💜 Purple
+            </div>
+            <div class="theme-option" data-theme="gradient-blue">
+              💙 Blue
+            </div>
+            <div class="theme-option" data-theme="gradient-sunset">
+              🌅 Sunset
+            </div>
+            <div class="theme-option" data-theme="dark">
+              🌙 Dark
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="setting-item">
+          <div class="setting-label">Keep Parameters</div>
+          <div class="setting-description">These parameters will be kept in URLs</div>
+          <div class="chip-container" id="keepParamsChips"></div>
+          <div class="add-param-form">
+            <input type="text" id="addKeepParam" placeholder="Add parameter (e.g., q)">
+            <button class="button" id="addKeepBtn">Add</button>
+          </div>
+        </div>
+      </div>
+      
+      <button class="button" id="saveSettingsBtn">Save Settings</button>
+      <button class="button" id="resetSettingsBtn">Reset to Defaults</button>
+    </div>
+    
+    <!-- Data Tab -->
+    <div class="tab-content" id="data-tab">
+      <div class="card">
+        <div class="setting-label">Export / Import</div>
+        <div class="setting-description">Backup or restore your settings and statistics</div>
+        
+        <div class="button-group" style="margin-top: 12px;">
+          <button class="button primary" id="exportBtn">📥 Export</button>
+          <button class="button primary" id="importBtn">📤 Import</button>
+        </div>
+        <input type="file" id="importFile" accept=".json">
+      </div>
+      
+      <div class="card">
+        <div class="setting-label">Preview</div>
+        <textarea id="jsonPreview" readonly placeholder="Your configuration will appear here..."></textarea>
+      </div>
+      
+      <button class="button" id="copyJsonBtn">Copy JSON</button>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

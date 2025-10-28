@@ -1,0 +1,54 @@
+{
+  "settings": {
+    "ui": {
+      "theme": "gradient-purple",
+      "showStats": true,
+      "showLastCleaned": true,
+      "animationsEnabled": true
+    },
+    "tracking": {
+      "enabled": true,
+      "keepParams": [
+        "q",
+        "tbm",
+        "tbs",
+        "start",
+        "num",
+        "hl",
+        "gl"
+      ],
+      "removeParams": [
+        "aqs",
+        "sourceid",
+        "ie",
+        "oe",
+        "gs_lcp",
+        "sclient",
+        "client",
+        "source",
+        "uact",
+        "ved",
+        "sa",
+        "ei",
+        "bih",
+        "biw",
+        "dpr",
+        "ech",
+        "psi",
+        "sxsrf",
+        "oq",
+        "gs_lcrp",
+        "gs_ivs",
+        "gs_lp",
+        "gs_ssp"
+      ]
+    }
+  },
+  "stats": {
+    "totalCleaned": 1,
+    "paramsRemoved": 4,
+    "lastCleaned": "2025-10-28T11:47:21.880Z"
+  },
+  "exportDate": "2025-10-28T11:47:40.241Z",
+  "version": "1.0"
+}
